@@ -6,7 +6,7 @@ int main(int argc, char const *argv[])
 {
 	int result;
 
-	result = start_spy("/tmp");
+	result = start_spy("/home/hp/test", 1);
 
 	if (result != 0) {
 		printf("Error start spy\n");
