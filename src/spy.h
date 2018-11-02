@@ -2,3 +2,4 @@
 #define BUF_LEN (1024 * (EVENT_SIZE + 16))
 
 int start_spy(char * path, int daemon);
+int spy_dir(int fd);
