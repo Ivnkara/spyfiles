@@ -1,11 +1,14 @@
-#include <stdio.h>
 #include <errno.h>
-#include <unistd.h>
-#include <sys/inotify.h>
-#include <fcntl.h>
 #include <dirent.h>
-#include <string.h>
+#include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/inotify.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <unistd.h>
+
 #include "spy.h"
 #include "helpers.h"
 
@@ -94,24 +97,47 @@ int modify_file(char * filename)
 	return 0;
 }
 
+
 int scan_dir(char * path)
 {
 	DIR *dir;
 	struct dirent *ent;
-	char * pathfile = calloc(64, 1);
+	struct scan_list list[5];
+	struct stat sb;
+	char * pathfile = calloc(64, sizeof(char));
+	int i = 0;
 
 	if ((dir = opendir(path)) != NULL) {
 		while ((ent = readdir(dir)) != NULL) {
+			if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+				continue;
+			}
+
 			pathfile = strcpy(pathfile, path);
+
 			strcat(pathfile, ent->d_name);
 			printf("%s\n", pathfile);
+			stat(pathfile, &sb);
+
+			list[i].path = calloc(64, sizeof(char));
+
+			strcpy(list[i].path, pathfile);
+			list[i].size = sb.st_size;
+
 			null_buffer(pathfile, 64);
+			null_buffer((char *)&sb, sizeof(sb));
+
+			i++;
   		}
+
 		closedir(dir);
 	} else {
 		perror("Opendir fail: ");
+
 		return -1;
 	}
+
+	print_scan_list(list, i);
 
 	return 0;
 }
