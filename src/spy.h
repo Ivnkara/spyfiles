@@ -8,8 +8,14 @@ int start_spy(char * path, int daemon);
 int spy_dir(int fd);
 int modify_file(char * filename);
 int scan_dir(char * path);
+int check_filesize(char * filename);
+
+void print_changes_file(char * pathfile, int bytes);
 
 struct scan_list {
 	char * path, * name;
 	int size;
 };
+
+struct scan_list list[SCAN_LIST_SIZE];
+int count_scan_list;
