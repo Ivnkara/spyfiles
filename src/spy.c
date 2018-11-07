@@ -29,6 +29,8 @@ int start_spy(char * path, int daemon)
 
 	wd = inotify_add_watch(fd, path, IN_MODIFY | IN_CREATE | IN_DELETE);
 
+	printf("Spy starting...\n");
+
 	do {
 		spy_dir_result = spy_dir(fd);
 
@@ -37,6 +39,8 @@ int start_spy(char * path, int daemon)
 
 			return -1;
 		}
+
+		printf("Spy continue...\n");
 	} while(daemon);
 
 	inotify_rm_watch(fd, wd);
@@ -56,7 +60,7 @@ int spy_dir(int fd)
 		return -1;
 	}
 
-	struct inotify_event * event = (struct inotify_event *) &buf[0];
+	struct inotify_event * event = (struct inotify_event * ) &buf[0];
 
 	if (event->len) {
 		print_event(event);
@@ -86,7 +90,7 @@ int spy_dir(int fd)
 		}
 	}
 
-	null_buffer((char *)buf, BUF_LEN);
+	clean_buffer((char * )buf, BUF_LEN);
 
 	return 0;
 }
@@ -102,9 +106,9 @@ int scan_dir(char * path)
 {
 	DIR *dir;
 	struct dirent *ent;
-	struct scan_list list[5];
+	struct scan_list list[SCAN_LIST_SIZE];
 	struct stat sb;
-	char * pathfile = calloc(64, sizeof(char));
+	char * pathfile = calloc(PATHNAME_SIZE, sizeof(char));
 	int i = 0;
 
 	if ((dir = opendir(path)) != NULL) {
@@ -116,16 +120,17 @@ int scan_dir(char * path)
 			pathfile = strcpy(pathfile, path);
 
 			strcat(pathfile, ent->d_name);
-			printf("%s\n", pathfile);
 			stat(pathfile, &sb);
 
-			list[i].path = calloc(64, sizeof(char));
+			list[i].path = calloc(PATHNAME_SIZE, sizeof(char));
+			list[i].name = calloc(FILENAME_SIZE, sizeof(char));
 
 			strcpy(list[i].path, pathfile);
+			strcpy(list[i].name, ent->d_name);
 			list[i].size = sb.st_size;
 
-			null_buffer(pathfile, 64);
-			null_buffer((char *)&sb, sizeof(sb));
+			clean_buffer(pathfile, PATHNAME_SIZE);
+			clean_buffer((char *)&sb, sizeof(sb));
 
 			i++;
   		}
