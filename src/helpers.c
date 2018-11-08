@@ -3,12 +3,23 @@
 
 #include "spy.h"
 
+/**
+ * Очищает (заполняет нулями) переданный буфер
+ *
+ * @param char * buffer Адрес буфера
+ * @param int    size   Размер буфера
+ */
 void clean_buffer(char * buffer, int size) {
 	for (int i = 0; i < size; ++i) {
 		buffer[i] = 0;
 	}
 }
 
+/**
+ * Распечатывает переданное событие inotify
+ *
+ * @param struct inotify_event * event
+ */
 void print_event(struct inotify_event * event) {
 	printf("Name:   %s\n", event->name);
 	printf("WD:     %d\n", event->wd);
@@ -17,8 +28,13 @@ void print_event(struct inotify_event * event) {
 	printf("Length: %d\n", event->len);
 }
 
+/**
+ * Распечатывает массив структур list хранящий список файлов в отслеживаемой директории
+ *
+ * @param struct scan_list * list  Адрес массива структур
+ * @param int                count Количество структур в массиве
+ */
 void print_scan_list(struct scan_list * list, int count) {
-	printf("Scan list:\n");
 	printf("Path: \t\t\tName: \tSize:\n");
 	printf("----------------------------------------------------\n");
 

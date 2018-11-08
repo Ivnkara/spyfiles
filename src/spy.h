@@ -6,7 +6,6 @@
 
 int start_spy(char * path, int daemon);
 int spy_dir(int fd);
-int modify_file(char * filename);
 int scan_dir(char * path);
 int check_filesize(char * filename);
 
