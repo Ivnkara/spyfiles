@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +12,9 @@
 
 #include "spy.h"
 #include "helpers.h"
+
+struct scan_list list[PATH_MAX];
+int count_scan_list = 0;
 
 /**
  * Функция начинает следить за директорией
@@ -113,8 +117,6 @@ int scan_dir(char * path)
 	struct dirent *ent;
 	struct stat sb;
 	char * pathfile = calloc(PATHNAME_SIZE, sizeof(char));
-
-	count_scan_list = 0;
 
 	if ((dir = opendir(path)) != NULL) {
 		while ((ent = readdir(dir)) != NULL) {

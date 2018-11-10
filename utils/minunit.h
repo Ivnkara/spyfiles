@@ -1,3 +1,6 @@
+#ifndef MINUNIT_H
+#define MINUNIT_H
+
 #include <stdio.h>
 
 #define mu_assert(message, test) do {	\
@@ -14,3 +17,5 @@
 } while (0)
 
 extern int tests_run;
+
+#endif

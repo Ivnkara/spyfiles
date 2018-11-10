@@ -1,8 +1,12 @@
+#ifndef SPY_H
+#define SPY_H
+
+#include <linux/limits.h>
+
 #define EVENT_SIZE (sizeof (struct inotify_event))
 #define BUF_LEN (1024 * (EVENT_SIZE + 16))
 #define PATHNAME_SIZE 256
 #define FILENAME_SIZE 64
-#define SCAN_LIST_SIZE 128
 
 int start_spy(char * path, int daemon);
 int spy_dir(int fd);
@@ -16,5 +20,7 @@ struct scan_list {
 	int size;
 };
 
-struct scan_list list[SCAN_LIST_SIZE];
-int count_scan_list;
+extern struct scan_list list[PATH_MAX];
+extern int count_scan_list;
+
+#endif
