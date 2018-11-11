@@ -5,7 +5,7 @@
 int main(int argc, char const *argv[])
 {
 	if (argc != 2) {
-		fprintf(stderr, "Не передан путь до директории\n");
+		fprintf(stderr, "Use spy-files /path/to/spy/dir\n");
 
 		return 1;
 	}

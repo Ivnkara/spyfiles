@@ -98,7 +98,7 @@ int spy_dir(int fd)
 		}
 	}
 
-	clean_buffer((char * )buf, BUF_LEN);
+	bzero(buf, BUF_LEN);
 
 	return 0;
 }
@@ -136,8 +136,8 @@ int scan_dir(char * path)
 			strcpy(list[count_scan_list].name, ent->d_name);
 			list[count_scan_list].size = sb.st_size;
 
-			clean_buffer(pathfile, PATHNAME_SIZE);
-			clean_buffer((char *)&sb, sizeof(sb));
+			bzero(pathfile, PATHNAME_SIZE);
+			bzero((char *)&sb, sizeof(sb));
 
 			count_scan_list++;
   		}

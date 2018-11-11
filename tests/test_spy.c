@@ -1,38 +1,76 @@
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/inotify.h>
 #include <unistd.h>
 
 #include "../src/spy.h"
 #include "../utils/minunit.h"
 
-#define PATH_DIR "/home/hp/test/"
-#define PATH_FILE "/home/hp/test/asd"
+#define PATH_DIR "./tmp/"
+#define PATH_FILE "./tmp/tmp.txt"
+
+void wr_file()
+{
+	int fd = open(PATH_FILE, O_CREAT | O_WRONLY);
+
+	if (fd < 0) {
+		perror("Open on tests fail: ");
+	}
+
+	char test_line[] = "data for spy tests";
+	write(fd, test_line, 20);
+	close(fd);
+}
 
 static char * test_start_spy()
 {
-	int
-		result   = start_spy(PATH_DIR, 0),
-		expected = 0;
+	int fr = fork();
 
-	mu_assert("---> ERROR, start_spy return not zero", expected == result);
+	if (fr < 0) {
+		perror("Fork error: ");
+	}
+
+	if (fr == 0) {
+		int
+			result   = start_spy(PATH_DIR, 0),
+			expected = 0;
+
+		mu_assert("---> ERROR, start_spy return not zero", expected == result);
+	} else {
+		sleep(1);
+		wr_file();
+	}
+
 
 	return 0;
 }
 
 static char * test_spy_dir()
 {
-	int
-		fd 		 = inotify_init(),
-		wd       = inotify_add_watch(fd, PATH_DIR, IN_MODIFY | IN_CREATE | IN_DELETE),
-		result   = spy_dir(fd),
-		expected = 0;
+	int fr = fork();
+
+	if (fr < 0) {
+		perror("Fork error: ");
+	}
+
+	if (fr == 0) {
+		int
+			fd 		 = inotify_init(),
+			wd       = inotify_add_watch(fd, PATH_DIR, IN_MODIFY | IN_CREATE | IN_DELETE),
+			result   = spy_dir(fd),
+			expected = 0;
 
 
-	mu_assert("---> ERROR, spy_dir return not zero", expected == result);
+		mu_assert("---> ERROR, spy_dir return not zero", expected == result);
 
-	inotify_rm_watch(fd, wd);
-	close(fd);
+		inotify_rm_watch(fd, wd);
+		close(fd);
+	} else {
+		sleep(1);
+		wr_file();
+	}
 
 	return 0;
 }
