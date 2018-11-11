@@ -39,6 +39,7 @@ static char * test_start_spy()
 
 
 	mu_assert("---> ERROR, start_spy return not zero", expected == result);
+	pthread_join(wr_file_thread, NULL);
 
 	return 0;
 }
@@ -59,6 +60,7 @@ static char * test_spy_dir()
 
 	inotify_rm_watch(fd, wd);
 	close(fd);
+	pthread_join(wr_file_thread, NULL);
 
 	return 0;
 }
