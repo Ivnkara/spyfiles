@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,8 +12,9 @@
 #define PATH_DIR "./tmp/"
 #define PATH_FILE "./tmp/tmp.txt"
 
-void wr_file()
+void * wr_file()
 {
+	sleep(1);
 	int fd = open(PATH_FILE, O_CREAT | O_WRONLY);
 
 	if (fd < 0) {
@@ -22,55 +24,41 @@ void wr_file()
 	char test_line[] = "data for spy tests";
 	write(fd, test_line, 20);
 	close(fd);
+
+	return NULL;
 }
 
 static char * test_start_spy()
 {
-	int fr = fork();
+	pthread_t wr_file_thread;
+	pthread_create(&wr_file_thread, NULL, wr_file, NULL);
 
-	if (fr < 0) {
-		perror("Fork error: ");
-	}
+	int
+		result   = start_spy(PATH_DIR, 0),
+		expected = 0;
 
-	if (fr == 0) {
-		int
-			result   = start_spy(PATH_DIR, 0),
-			expected = 0;
 
-		mu_assert("---> ERROR, start_spy return not zero", expected == result);
-	} else {
-		sleep(1);
-		wr_file();
-	}
-
+	mu_assert("---> ERROR, start_spy return not zero", expected == result);
 
 	return 0;
 }
 
 static char * test_spy_dir()
 {
-	int fr = fork();
+	pthread_t wr_file_thread;
+	pthread_create(&wr_file_thread, NULL, wr_file, NULL);
 
-	if (fr < 0) {
-		perror("Fork error: ");
-	}
-
-	if (fr == 0) {
-		int
-			fd 		 = inotify_init(),
-			wd       = inotify_add_watch(fd, PATH_DIR, IN_MODIFY | IN_CREATE | IN_DELETE),
-			result   = spy_dir(fd),
-			expected = 0;
+	int
+		fd 		 = inotify_init(),
+		wd       = inotify_add_watch(fd, PATH_DIR, IN_MODIFY | IN_CREATE | IN_DELETE),
+		result   = spy_dir(fd),
+		expected = 0;
 
 
-		mu_assert("---> ERROR, spy_dir return not zero", expected == result);
+	mu_assert("---> ERROR, spy_dir return not zero", expected == result);
 
-		inotify_rm_watch(fd, wd);
-		close(fd);
-	} else {
-		sleep(1);
-		wr_file();
-	}
+	inotify_rm_watch(fd, wd);
+	close(fd);
 
 	return 0;
 }
