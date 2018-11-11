@@ -49,12 +49,11 @@ static char * test_spy_dir()
 	pthread_t wr_file_thread;
 	pthread_create(&wr_file_thread, NULL, wr_file, NULL);
 
-	int
-		fd 		 = inotify_init(),
-		wd       = inotify_add_watch(fd, PATH_DIR, IN_MODIFY | IN_CREATE | IN_DELETE),
-		result   = spy_dir(fd),
-		expected = 0;
+	int fd, wd, result, expected = 0;
 
+	fd 	   = inotify_init();
+	wd     = inotify_add_watch(fd, PATH_DIR, IN_MODIFY | IN_CREATE | IN_DELETE);
+	result = spy_dir(fd);
 
 	mu_assert("---> ERROR, spy_dir return not zero", expected == result);
 
