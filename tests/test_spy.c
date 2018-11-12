@@ -58,6 +58,9 @@ static char * test_start_spy()
 	*ptr = 0;
 
 	dup2(old_stdout, 1);
+	close(old_stdout);
+	close(p[0]);
+	close(p[1]);
 
 	return 0;
 }
@@ -97,6 +100,9 @@ static char * test_spy_dir()
 	*ptr = 0;
 
 	dup2(old_stdout, 1);
+	close(old_stdout);
+	close(p[0]);
+	close(p[1]);
 
 	return 0;
 }
