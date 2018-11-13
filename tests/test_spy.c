@@ -1,5 +1,6 @@
 #include <fcntl.h>
 #include <pthread.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,13 +10,13 @@
 #include "../src/spy.h"
 #include "../utils/minunit.h"
 
-#define PATH_DIR "./tmp/"
-#define PATH_FILE "./tmp/tmp.txt"
+char * tempdir;
+char * tempfile;
 
 void * wr_file()
 {
 	sleep(1);
-	int fd = open(PATH_FILE, O_CREAT | O_WRONLY);
+	int fd = open(tempfile, O_CREAT | O_WRONLY, 0777);
 
 	if (fd < 0) {
 		perror("Open on tests fail: ");
@@ -43,7 +44,7 @@ static char * test_start_spy()
 	pthread_create(&wr_file_thread, NULL, wr_file, NULL);
 
 	int
-		result   = start_spy(PATH_DIR, 0),
+		result   = start_spy(tempdir, 0),
 		expected = 0;
 
 	do {
@@ -82,7 +83,7 @@ static char * test_spy_dir()
 	int fd, wd, result, expected = 0;
 
 	fd 	   = inotify_init();
-	wd     = inotify_add_watch(fd, PATH_DIR, IN_MODIFY | IN_CREATE | IN_DELETE);
+	wd     = inotify_add_watch(fd, tempdir, IN_MODIFY | IN_CREATE | IN_DELETE);
 	result = spy_dir(fd);
 
 	do {
@@ -110,7 +111,7 @@ static char * test_spy_dir()
 static char * test_scan_dir()
 {
 	int
-		result   = scan_dir(PATH_DIR),
+		result   = scan_dir(tempdir),
 		expected = 0;
 
 	mu_assert("---> ERROR, scan_dir return not zero", expected == result);
@@ -121,7 +122,7 @@ static char * test_scan_dir()
 static char * test_check_filesize()
 {
 	int
-		result   = check_filesize(PATH_FILE),
+		result   = check_filesize(tempfile),
 		expected = 0;
 
 	mu_assert("---> ERROR, check_filesize return not zero", expected == result);
@@ -143,6 +144,19 @@ static char * all_tests()
 
 int main()
 {
+	char tmp[] = "/tmp/spytest-XXXXXX";
+
+	tempfile = calloc(64, sizeof(char));
+	tempdir = calloc(64, sizeof(char));
+	
+	tempdir = mkdtemp(tmp);
+	
+	strcpy(tempfile, tempdir);
+	strcat(tempfile, "/tmp.txt");
+	
+	printf("Create temp directory for test: %s\n", tempdir);
+	printf("Create temp file for test: %s\n", tempfile);
+
 	char * result = all_tests();
 
 	if (result != 0) {
@@ -152,6 +166,8 @@ int main()
 	}
 
 	printf("Tests run: %d\n", tests_run);
+
+	free(tempdir);
 
 	return 0;
 }
