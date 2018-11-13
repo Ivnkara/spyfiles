@@ -8,8 +8,11 @@
 #define PATHNAME_SIZE 256
 #define FILENAME_SIZE 64
 
-int start_spy(char * path, int daemon);
-int spy_dir(int fd);
+int get_inotify_fd();
+int get_watch_wd(char * path, int inotify_fd);
+
+struct inotify_event * get_event(int inotify_fd);
+
 int scan_dir(char * path);
 int check_filesize(char * filename);
 
@@ -23,4 +26,4 @@ struct scan_list {
 extern struct scan_list list[PATH_MAX];
 extern int count_scan_list;
 
-#endif
+#endif /* SPY_H_ENDIF */

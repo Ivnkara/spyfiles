@@ -17,19 +17,13 @@ struct scan_list list[PATH_MAX];
 int count_scan_list = 0;
 
 /**
- * Функция начинает следить за директорией
+ * Получить дескриптор inotify
  *
- * TODO: нужно сделать чтобы сканирование происходило после каждого события, а не только при начале слежки
- *
- * @param  char * path   Путь до директории за которой нужно следить
- * @param  int    daemon 1 - Окончить слежку после первых изменений, 0 - Продолжать слежку постоянно 
- * @return int           0 - при успешном завершении, -1 - при ошибке
+ * @return int inotify_fd
  */
-int start_spy(char * path, int daemon)
+int get_inotify_fd()
 {
-	int fd, wd;
-
-	fd = inotify_init();
+	int fd = inotify_init();
 
 	if (fd < 0) {
 		perror("Error inotify_init");
@@ -37,70 +31,77 @@ int start_spy(char * path, int daemon)
 		return -1;
 	}
 
-	scan_dir(path);
+	return fd;
+}
 
-	wd = inotify_add_watch(fd, path, IN_MODIFY | IN_CREATE | IN_DELETE);
+/**
+ * Функция начинает следить за директорией
+ *
+ * TODO: нужно сделать чтобы сканирование происходило после каждого события, а не только при начале слежки
+ *
+ * @param  char * path       Путь до директории за которой нужно следить
+ * @param  int    inotify_fd Путь до директории за которой нужно следить
+ * @return int               0 - при успешном завершении, -1 - при ошибке
+ */
+int get_watch_wd(char * path, int inotify_fd)
+{
+	int wd = inotify_add_watch(inotify_fd, path, IN_MODIFY | IN_CREATE | IN_DELETE);
 
-	printf("Spy starting...\n\n");
+	if (wd < 0) {
+		perror("Error inotify add watch: ");
 
-	do {
-		spy_dir(fd);
-	} while(daemon);
+		return -1;
+	}
 
-	inotify_rm_watch(fd, wd);
-	close(fd);
-
-	return 0;
+	return wd;
 }
 
 /**
  * Инициирует структуру inotify_event, и отслеживает события в директории
  *
- * @param  int fd Дескриптор inotify_init
- * @return int    0 - успех, -1 - ошибка
+ * @param  int inotify_fd Дескриптор inotify_init
+ * @return int    		  0 - успех, -1 - ошибка
  */
-int spy_dir(int fd)
+struct inotify_event * get_event(int inotify_fd)
 {
 	char buf[BUF_LEN];
-	int len = read(fd, buf, BUF_LEN);
+	int len = read(inotify_fd, buf, BUF_LEN);
 
 	if (len < 0 ) {
-		perror("Error read fd");
+		perror("Error read inotify_fd");
 
-		return -1;
+		return NULL;
 	}
 
-	struct inotify_event * event = (struct inotify_event * ) &buf[0];
+	struct inotify_event * event = (struct inotify_event * ) &buf;
 
-	if (event->len) {
-		switch (event->mask & (IN_MODIFY | IN_CREATE | IN_DELETE)) {
-			case IN_MODIFY:
-				if (event->mask & IN_ISDIR) {
-					// делаем что-нибудь
-				} else {
-					check_filesize(event->name);
-				}
-				break;
-			case IN_CREATE:
-				if (event->mask & IN_ISDIR) {
-					// делаем что-нибудь
-				} else {
-					// делаем что-нибудь
-				}
-				break;
-			case IN_DELETE:
-				if (event->mask & IN_ISDIR) {
-					// делаем что-нибудь
-				} else {
-					// делаем что-нибудь
-				}
-				break;
-		}
-	}
+	// if (event->len) {
+	// 	switch (event->mask & (IN_MODIFY | IN_CREATE | IN_DELETE)) {
+	// 		case IN_MODIFY:
+	// 			if (event->mask & IN_ISDIR) {
+	// 				// делаем что-нибудь
+	// 			} else {
+	// 				check_filesize(event->name);
+	// 			}
+	// 			break;
+	// 		case IN_CREATE:
+	// 			if (event->mask & IN_ISDIR) {
+	// 				// делаем что-нибудь
+	// 			} else {
+	// 				// делаем что-нибудь
+	// 			}
+	// 			break;
+	// 		case IN_DELETE:
+	// 			if (event->mask & IN_ISDIR) {
+	// 				// делаем что-нибудь
+	// 			} else {
+	// 				// делаем что-нибудь
+	// 			}
+	// 			break;
+	// 	}
+	// }
 
-	bzero(buf, BUF_LEN);
-
-	return 0;
+	return event;
 }
 
 /**
