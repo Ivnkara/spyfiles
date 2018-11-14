@@ -14,7 +14,7 @@
 #include "helpers.h"
 
 struct scan_list list[PATH_MAX];
-int count_scan_list = 0;
+int count_scan_list;
 
 /**
  * Получить дескриптор inotify
@@ -92,6 +92,7 @@ int prepare_event(struct inotify_event * event)
 				if (event->mask & IN_ISDIR) {
 					// делаем что-нибудь
 				} else {
+					print_event(event);
 					check_filesize(event->name);
 				}
 				break;
@@ -130,6 +131,7 @@ int scan_dir(char * path, int print_result)
 	struct dirent *ent;
 	struct stat sb;
 	char * pathfile = calloc(PATHNAME_SIZE, sizeof(char));
+	count_scan_list = 0;
 
 	if ((dir = opendir(path)) != NULL) {
 		while ((ent = readdir(dir)) != NULL) {
@@ -182,6 +184,7 @@ int check_filesize(char * filename)
 {
 	struct stat sb;
 
+printf("%d\n\n\n",count_scan_list);
 	for (int i = 0; i < count_scan_list; ++i) {
 		if (strcmp(list[i].name, filename) == 0) {
 			stat(list[i].path, &sb);
