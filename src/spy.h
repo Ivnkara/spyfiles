@@ -2,6 +2,7 @@
 #define SPY_H
 
 #include <linux/limits.h>
+#include <sys/inotify.h>
 
 #define EVENT_SIZE (sizeof (struct inotify_event))
 #define BUF_LEN (1024 * (EVENT_SIZE + 16))
@@ -10,10 +11,11 @@
 
 int get_inotify_fd();
 int get_watch_wd(char * path, int inotify_fd);
+int prepare_event(struct inotify_event * event);
 
 struct inotify_event * get_event(int inotify_fd);
 
-int scan_dir(char * path);
+int scan_dir(char * path, int print_result);
 int check_filesize(char * filename);
 
 void print_changes_file(char * pathfile, int bytes);

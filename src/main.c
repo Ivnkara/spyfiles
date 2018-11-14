@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/inotify.h>
+
 #include "spy.h"
 #include "helpers.h"
 
@@ -19,7 +22,7 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	int scan_dir_result = scan_dir((char *)argv[1]);
+	int scan_dir_result = scan_dir((char *)argv[1], 1);
 
 	if (scan_dir_result < 0) {
 		fprintf(stderr, "Error scan dir\n");
@@ -35,9 +38,14 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	struct inotify_event * event = get_event(inotify_fd);
+	struct inotify_event * event;
 
-	print_event(event);
+	while (1) {
+		scan_dir((char *)argv[1], 0);
+		event = get_event(inotify_fd);
+		prepare_event(event);
+		bzero(event, EVENT_SIZE);
+	}
 
 	return 0;
 }

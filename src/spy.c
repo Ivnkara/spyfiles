@@ -75,33 +75,44 @@ struct inotify_event * get_event(int inotify_fd)
 
 	struct inotify_event * event = (struct inotify_event * ) &buf;
 
-	// if (event->len) {
-	// 	switch (event->mask & (IN_MODIFY | IN_CREATE | IN_DELETE)) {
-	// 		case IN_MODIFY:
-	// 			if (event->mask & IN_ISDIR) {
-	// 				// делаем что-нибудь
-	// 			} else {
-	// 				check_filesize(event->name);
-	// 			}
-	// 			break;
-	// 		case IN_CREATE:
-	// 			if (event->mask & IN_ISDIR) {
-	// 				// делаем что-нибудь
-	// 			} else {
-	// 				// делаем что-нибудь
-	// 			}
-	// 			break;
-	// 		case IN_DELETE:
-	// 			if (event->mask & IN_ISDIR) {
-	// 				// делаем что-нибудь
-	// 			} else {
-	// 				// делаем что-нибудь
-	// 			}
-	// 			break;
-	// 	}
-	// }
-
 	return event;
+}
+
+/**
+ * Обработка события
+ *
+ * @param  struct inotify_event * event событие
+ * @return int                          0 - успех, -1 - ошибка
+ */
+int prepare_event(struct inotify_event * event)
+{
+	if (event->len) {
+		switch (event->mask & (IN_MODIFY | IN_CREATE | IN_DELETE)) {
+			case IN_MODIFY:
+				if (event->mask & IN_ISDIR) {
+					// делаем что-нибудь
+				} else {
+					check_filesize(event->name);
+				}
+				break;
+			case IN_CREATE:
+				if (event->mask & IN_ISDIR) {
+					// делаем что-нибудь
+				} else {
+					// делаем что-нибудь
+				}
+				break;
+			case IN_DELETE:
+				if (event->mask & IN_ISDIR) {
+					// делаем что-нибудь
+				} else {
+					// делаем что-нибудь
+				}
+				break;
+		}
+	}
+
+	return 0;
 }
 
 /**
@@ -109,10 +120,11 @@ struct inotify_event * get_event(int inotify_fd)
  * в специальный массив list структур scan_list,
  * после чего распичатывает список файлов и директорий
  *
- * @param  char * path Путь до сканируемой директории
- * @return int         0 - успех, -1 - ошибка
+ * @param  char * path Путь    до сканируемой директории
+ * @param  int    print_result печатать ли результат сканирования
+ * @return int                 0 - успех, -1 - ошибка
  */
-int scan_dir(char * path)
+int scan_dir(char * path, int print_result)
 {
 	DIR *dir;
 	struct dirent *ent;
@@ -151,7 +163,10 @@ int scan_dir(char * path)
 	}
 
 	free(pathfile);
-	print_scan_list(list, count_scan_list);
+
+	if (print_result) {
+		print_scan_list(list, count_scan_list);
+	}
 
 	return 0;
 }
