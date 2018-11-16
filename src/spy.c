@@ -65,6 +65,7 @@ int get_watch_wd(char * path, int inotify_fd)
 struct inotify_event * get_event(int inotify_fd)
 {
 	char buf[BUF_LEN];
+
 	int len = read(inotify_fd, buf, BUF_LEN);
 
 	if (len < 0 ) {
@@ -92,7 +93,6 @@ int prepare_event(struct inotify_event * event)
 				if (event->mask & IN_ISDIR) {
 					// делаем что-нибудь
 				} else {
-					print_event(event);
 					check_filesize(event->name);
 				}
 				break;
@@ -184,7 +184,6 @@ int check_filesize(char * filename)
 {
 	struct stat sb;
 
-printf("%d\n\n\n",count_scan_list);
 	for (int i = 0; i < count_scan_list; ++i) {
 		if (strcmp(list[i].name, filename) == 0) {
 			stat(list[i].path, &sb);
@@ -210,6 +209,7 @@ printf("%d\n\n\n",count_scan_list);
  */
 void print_changes_file(char * pathfile, int bytes)
 {
+	bytes += 1;
 	int df = open(pathfile, O_RDONLY);
 	char * buffer = calloc(bytes, sizeof(char));
 
@@ -223,9 +223,9 @@ void print_changes_file(char * pathfile, int bytes)
 
 	if (count > 0) {
 		printf("-----> Новые данные в файле:\n");
-		printf("____________________________________________________________________________________\n");
-		printf("\n%s\n", buffer);
-		printf("____________________________________________________________________________________\n");
+		printf("***********************************************************************************************\n");
+		printf("%s", buffer);
+		printf("***********************************************************************************************\n");
 		printf("\nSpy continue...\n\n");
 	}
 
