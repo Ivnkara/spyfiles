@@ -22,10 +22,11 @@ void * wr_file(void * which_file)
 {
 	sleep(1);
 	int fd;
+	int type = *(int *)which_file;
 
-	if (*which_file == 1) {
+	if (type == 1) {
 		fd = open(tempfile_for_event, O_CREAT | O_WRONLY | O_TRUNC, 0777);
-	} else if (*which_file == 2) {
+	} else if (type == 2) {
 		fd = open(tempfile_for_filesize, O_CREAT | O_WRONLY | O_TRUNC, 0777);
 	}
 
