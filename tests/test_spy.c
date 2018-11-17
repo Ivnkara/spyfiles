@@ -38,7 +38,9 @@ void * wr_file(void * which_file)
 	write(fd, test_line, 32);
 	close(fd);
 
-	return NULL;
+	*(int *)which_file = type;
+
+	return which_file;
 }
 
 static char * test_get_inotify_fd()
@@ -69,7 +71,8 @@ static char * test_get_event()
 
 	mu_assert("---> ERROR, get_event returns wrong name file", strcmp(expected, event->name) == 0);
 
-	pthread_join(wr_file_thread, NULL);
+	void *ret;
+	pthread_join(wr_file_thread, &ret);
 
 	return 0;
 }
@@ -110,7 +113,8 @@ static char * test_check_filesize()
 	mu_assert("---> ERROR, start_spy return not zero", 0 == result);
 	mu_assert("---> ERROR, stdout not equals expected", strcmp(expected, buf) == 0);
 
-	pthread_join(wr_file_thread, NULL);
+	void *ret;
+	pthread_join(wr_file_thread, &ret);
 	*ptr = 0;
 
 	dup2(old_stdout, 1);
