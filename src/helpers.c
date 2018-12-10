@@ -2,6 +2,7 @@
 #include <sys/inotify.h>
 
 #include "spy.h"
+#include "list_files.h"
 
 /**
  * Распечатывает переданное событие inotify

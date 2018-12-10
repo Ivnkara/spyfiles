@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include "../src/spy.h"
+#include "../src/list_files.h"
 #include "../utils/minunit.h"
 
 char * tempdir_for_event;

@@ -14,7 +14,10 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	int inotify_fd = get_inotify_fd();
+	int inotify_fd, scan_dir_result, add_watch_result;
+	struct inotify_event * event;
+
+	inotify_fd = get_inotify_fd();
 
 	if (inotify_fd < 0) {
 		fprintf(stderr, "Error get inotify fd\n");
@@ -22,7 +25,7 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	int scan_dir_result = scan_dir((char *)argv[1], 1);
+	scan_dir_result = scan_dir((char *)argv[1], 1);
 
 	if (scan_dir_result < 0) {
 		fprintf(stderr, "Error scan dir\n");
@@ -30,15 +33,13 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	int add_watch_result = get_watch_wd((char *)argv[1], inotify_fd);
+	add_watch_result = get_watch_wd((char *)argv[1], inotify_fd);
 
 	if (add_watch_result < 0) {
 		fprintf(stderr, "Error get watch wd\n");
 
 		return 1;
 	}
-
-	struct inotify_event * event;
 
 	while (1) {
 		scan_dir((char *)argv[1], 0);
