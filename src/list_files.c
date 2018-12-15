@@ -11,8 +11,32 @@
 #include "helpers.h"
 #include "list_files.h"
 
+/**
+ * Директория для отслеживания файлов
+ */
+char * scan_path = NULL;
+/**
+ * Массив структур с информацией отслеживаемых файлов 
+ */
 struct scan_list list[PATH_MAX];
+/**
+ * Переменная с количеством элементов в массие list
+ */
 int count_scan_list;
+
+/**
+ * Инициализирует переменную scan_path
+ *
+ * @param  char  * path Путь до директории
+ * @return int
+ */
+int init_scan_path(char * path)
+{
+	scan_path = calloc(PATHNAME_SIZE, sizeof(char));
+	strcpy(scan_path, path);
+
+	return 0;
+}
 
 /**
  * Сканирует директорию и записывает список файлов (путь, имя, размер)
@@ -31,13 +55,17 @@ int scan_dir(char * path, int print_result)
 	char * pathfile = calloc(PATHNAME_SIZE, sizeof(char));
 	count_scan_list = 0;
 
-	if ((dir = opendir(path)) != NULL) {
+	if (scan_path == NULL) {
+		init_scan_path(path);
+	}
+
+	if ((dir = opendir(scan_path)) != NULL) {
 		while ((ent = readdir(dir)) != NULL) {
 			if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
 				continue;
 			}
 
-			pathfile = strcpy(pathfile, path);
+			pathfile = strcpy(pathfile, scan_path);
 
 			strcat(pathfile, ent->d_name);
 			stat(pathfile, &sb);
@@ -78,7 +106,7 @@ int scan_dir(char * path, int print_result)
  * @param  char * filename Путь до проверяемого файла
  * @return int 
  */
-int check_filesize(char * filename)
+int check_file(char * filename)
 {
 	struct stat sb;
 
@@ -93,6 +121,19 @@ int check_filesize(char * filename)
 			}
 		 } 
 	}
+
+	return 0;
+}
+
+/**
+ * Добавляет файл к списку для отслеживания и распечатывает эту информацию
+ *
+ * @param  char * filename Имя нового файла
+ * @return int
+ */
+int add_file_to_scan(char * filename)
+{
+	printf("-:-:-:-:-:-: Был создан и добавлен к списку файл под именем %s :-:-:-:-:-:-\n", filename);
 
 	return 0;
 }

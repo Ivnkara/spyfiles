@@ -89,7 +89,7 @@ static char * test_scan_dir()
 	return 0;
 }
 
-static char * test_check_filesize()
+static char * test_check_file()
 {
 	char expected[] = "-----> Размер файла tmp.txt увеличился на 20 байт";
 	int old_stdout = dup(1);
@@ -111,7 +111,7 @@ static char * test_check_filesize()
 	pthread_create(&wr_file_thread2, NULL, wr_file, &arg);
 	pthread_join(wr_file_thread2, &ret2);
 
-	int result = check_filesize("tmp.txt");
+	int result = check_file("tmp.txt");
 
 	do {
 		read(p[0], ptr, 1);
@@ -226,7 +226,7 @@ static char * all_tests()
 	mu_run_test(test_get_event);
 	mu_run_test(test_scan_dir);
 	mu_run_test(test_print_changes_file);
-	mu_run_test(test_check_filesize);
+	mu_run_test(test_check_file);
 
 	return 0;
 }

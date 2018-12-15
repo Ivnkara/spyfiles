@@ -86,19 +86,18 @@ int prepare_event(struct inotify_event * event)
 		switch (event->mask & (IN_MODIFY | IN_CREATE | IN_DELETE)) {
 			case IN_MODIFY:
 				if (event->mask | IN_ISDIR) {
-					check_filesize(event->name);
+					check_file(event->name);
 				}
 				break;
 			case IN_CREATE:
 				if (event->mask | IN_ISDIR) {
-					// делаем что-нибудь
+					add_file_to_scan(event->name);
 				}
 				break;
 			case IN_DELETE:
 				if (event->mask | IN_ISDIR) {
 					// делаем что-нибудь
 				}
-				break;
 		}
 	}
 
