@@ -43,19 +43,19 @@ int init_scan_path(char * path)
  * в специальный массив list структур scan_list,
  * после чего распичатывает список файлов и директорий
  *
- * @param  char * path Путь    до сканируемой директории
- * @param  int    print_result печатать ли результат сканирования
+ * @param  char * path         Путь до сканируемой директории
+ * @param  int    print_result Печатать ли результат сканирования
+ * @param  int    new_dir      Переиницилизировать ли scan_path
  * @return int                 0 - успех, -1 - ошибка
  */
-int scan_dir(char * path, int print_result)
+int scan_dir(char * path, int print_result, int new_dir)
 {
 	DIR *dir;
 	struct dirent *ent;
-	struct stat sb;
 	char * pathfile = calloc(PATHNAME_SIZE, sizeof(char));
 	count_scan_list = 0;
 
-	if (scan_path == NULL) {
+	if (scan_path == NULL || new_dir == 1) {
 		init_scan_path(path);
 	}
 
@@ -68,19 +68,8 @@ int scan_dir(char * path, int print_result)
 			pathfile = strcpy(pathfile, scan_path);
 
 			strcat(pathfile, ent->d_name);
-			stat(pathfile, &sb);
-
-			list[count_scan_list].path = calloc(PATHNAME_SIZE, sizeof(char));
-			list[count_scan_list].name = calloc(FILENAME_SIZE, sizeof(char));
-
-			strcpy(list[count_scan_list].path, pathfile);
-			strcpy(list[count_scan_list].name, ent->d_name);
-			list[count_scan_list].size = sb.st_size;
-
+			add_file_to_list(pathfile, ent->d_name);
 			bzero(pathfile, PATHNAME_SIZE);
-			bzero((char *)&sb, sizeof(sb));
-
-			count_scan_list++;
   		}
 
 		closedir(dir);
@@ -95,6 +84,31 @@ int scan_dir(char * path, int print_result)
 	if (print_result) {
 		print_scan_list(list, count_scan_list);
 	}
+
+	return 0;
+}
+
+/**
+ * Добавляет файл к списку отслеживаемых файлов
+ *
+ * @param  char * pathfile
+ * @return int
+ */
+int add_file_to_list(char * pathfile, char * filename)
+{
+	struct stat sb;
+
+	stat(pathfile, &sb);
+
+	list[count_scan_list].path = calloc(PATHNAME_SIZE, sizeof(char));
+	list[count_scan_list].name = calloc(FILENAME_SIZE, sizeof(char));
+
+	strcpy(list[count_scan_list].path, pathfile);
+	strcpy(list[count_scan_list].name, filename);
+	list[count_scan_list].size = sb.st_size;
+
+	bzero((char *)&sb, sizeof(sb));
+	count_scan_list++;
 
 	return 0;
 }
@@ -134,6 +148,8 @@ int check_file(char * filename)
 int add_file_to_scan(char * filename)
 {
 	printf("-:-:-:-:-:-: Был создан и добавлен к списку файл под именем %s :-:-:-:-:-:-\n", filename);
+	printf("%s\n", scan_path);
+	printf("%d\n", count_scan_list);
 
 	return 0;
 }

@@ -15,9 +15,10 @@ struct scan_list {
 extern struct scan_list list[PATH_MAX];
 extern int count_scan_list;
 
-int scan_dir(char * path, int print_result);
+int scan_dir(char * path, int print_result, int new_dir);
 int check_file(char * filename);
 int add_file_to_scan(char * filename);
+int add_file_to_list(char * pathfile, char * filename);
 
 void print_changes_file(char * pathfile, int bytes);
 

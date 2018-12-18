@@ -84,7 +84,7 @@ static char * test_get_event()
 
 static char * test_scan_dir()
 {
-	mu_assert("---> ERROR, scan_dir returns not zero", scan_dir(tempdir_for_event, 0) == 0);
+	mu_assert("---> ERROR, scan_dir returns not zero", scan_dir(tempdir_for_event, 0, 1) == 0);
 
 	return 0;
 }
@@ -96,17 +96,17 @@ static char * test_check_file()
 	int p[2];
 	pipe(p);
 	dup2(p[1], 1);
-	char buf[80];
+	char buf[100];
 	char *ptr = buf;
 	int arg = 2;
 	
 	pthread_t wr_file_thread1, wr_file_thread2;
-	pthread_create(&wr_file_thread1, NULL, wr_file, &arg);
-
 	void * ret1, * ret2;
+
+	pthread_create(&wr_file_thread1, NULL, wr_file, &arg);
 	pthread_join(wr_file_thread1, &ret1);
 
-	scan_dir(tempdir_for_filesize, 0);
+	scan_dir(tempdir_for_filesize, 0, 1);
 
 	pthread_create(&wr_file_thread2, NULL, wr_file, &arg);
 	pthread_join(wr_file_thread2, &ret2);
@@ -150,7 +150,7 @@ static char * test_print_changes_file()
 	void * ret1, * ret2;
 	pthread_join(wr_file_thread1, &ret1);
 
-	scan_dir(tempdir_for_filesize, 0);
+	scan_dir(tempdir_for_filesize, 0, 1);
 
 	pthread_create(&wr_file_thread2, NULL, wr_file, &arg);
 	pthread_join(wr_file_thread2, &ret2);

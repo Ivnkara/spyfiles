@@ -25,7 +25,7 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	scan_dir_result = scan_dir((char *)argv[1], 1);
+	scan_dir_result = scan_dir((char *)argv[1], 1, 1);
 
 	if (scan_dir_result < 0) {
 		fprintf(stderr, "Error scan dir\n");
@@ -42,7 +42,7 @@ int main(int argc, char const *argv[])
 	}
 
 	while (1) {
-		scan_dir((char *)argv[1], 0);
+		scan_dir((char *)argv[1], 0, 0);
 		event = get_event(inotify_fd);
 		prepare_event(event);
 		bzero(event, EVENT_SIZE);
