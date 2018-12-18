@@ -148,8 +148,13 @@ int check_file(char * filename)
 int add_file_to_scan(char * filename)
 {
 	printf("-:-:-:-:-:-: Был создан и добавлен к списку файл под именем %s :-:-:-:-:-:-\n", filename);
-	printf("%s\n", scan_path);
-	printf("%d\n", count_scan_list);
+
+	char * pathfile = calloc(PATHNAME_SIZE, sizeof(char));
+
+	strcpy(pathfile, scan_path);
+	strcat(pathfile, filename);
+
+	add_file_to_list(pathfile, filename);
 
 	return 0;
 }
