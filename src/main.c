@@ -15,7 +15,6 @@ int main(int argc, char const *argv[])
 	}
 
 	int inotify_fd, scan_dir_result, add_watch_result;
-	struct inotify_event * event;
 
 	inotify_fd = get_inotify_fd();
 
@@ -41,11 +40,14 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
+	char * events = calloc(BUF_LEN, sizeof(char));
+	int count;
+
 	while (1) {
 		scan_dir((char *)argv[1], 0, 0);
-		event = get_event(inotify_fd);
-		prepare_event(event);
-		bzero(event, EVENT_SIZE);
+		count = get_event(inotify_fd, events);
+		prepare_event(count, events);
+		bzero(events, EVENT_SIZE);
 	}
 
 	return 0;

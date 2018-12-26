@@ -58,20 +58,26 @@ int get_watch_wd(char * path, int inotify_fd)
  * @param  int inotify_fd Дескриптор inotify_init
  * @return int    		  0 - успех, -1 - ошибка
  */
-struct inotify_event * get_event(int inotify_fd)
+int get_event(int inotify_fd, char * buf)
 {
-	char buf[BUF_LEN];
+	int i = 0;
 	int len = read(inotify_fd, buf, BUF_LEN);
 
 	if (len < 0 ) {
 		perror("Error read inotify_fd");
 
-		return NULL;
+		return 0;
 	}
 
-	struct inotify_event * event = (struct inotify_event * ) &buf;
+	int count = 0;
+	while (i < len) {
+		struct inotify_event * event = (struct inotify_event * ) &buf[i];
+		i += EVENT_SIZE + event->len;
+		count++;
+	}
 
-	return event;
+
+	return count;
 }
 
 /**
@@ -80,25 +86,30 @@ struct inotify_event * get_event(int inotify_fd)
  * @param  struct inotify_event * event событие
  * @return int                          0 - успех, -1 - ошибка
  */
-int prepare_event(struct inotify_event * event)
+int prepare_event(int count, char * events)
 {
-	if (event->len) {
-		switch (event->mask & (IN_MODIFY | IN_CREATE | IN_DELETE)) {
-			case IN_MODIFY:
-				if (event->mask | IN_ISDIR) {
-					check_file(event->name);
-				}
-				break;
-			case IN_CREATE:
-				if (event->mask | IN_ISDIR) {
-					add_file_to_scan(event->name);
-				}
-				break;
-			case IN_DELETE:
-				if (event->mask | IN_ISDIR) {
-					// делаем что-нибудь
-				}
+	int bytes = 0;
+	for (int i = 0; i < count; ++i) {
+		struct inotify_event * event = (struct inotify_event * ) &events[bytes];
+		if (event->len) {
+			switch (event->mask & (IN_MODIFY | IN_CREATE | IN_DELETE)) {
+				case IN_MODIFY:
+					if (event->mask | IN_ISDIR) {
+						check_file(event->name);
+					}
+					break;
+				case IN_CREATE:
+					if (event->mask | IN_ISDIR) {
+						add_file_to_scan(event->name);
+					}
+					break;
+				case IN_DELETE:
+					if (event->mask | IN_ISDIR) {
+						// делаем что-нибудь
+					}
+			}
 		}
+		bytes += EVENT_SIZE + event->len;
 	}
 
 	return 0;

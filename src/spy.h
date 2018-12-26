@@ -9,8 +9,8 @@
 
 int get_inotify_fd();
 int get_watch_wd(char * path, int inotify_fd);
-int prepare_event(struct inotify_event * event);
+int prepare_event(int count, char * events);
 
-struct inotify_event * get_event(int inotify_fd);
+int get_event(int inotify_fd, char * buf);
 
 #endif /* SPY_H_ENDIF */
