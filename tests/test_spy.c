@@ -72,7 +72,9 @@ static char * test_get_event()
 	pthread_t wr_file_thread;
 	pthread_create(&wr_file_thread, NULL, wr_file, &arg);
 
-	struct inotify_event * event = get_event(inotify_fd);
+	char * events = calloc(BUF_LEN, sizeof(char));
+	get_event(inotify_fd, events);	
+	struct inotify_event * event = (struct inotify_event * ) &events[0];
 
 	mu_assert("---> ERROR, get_event returns wrong name file", strcmp(expected, event->name) == 0);
 
