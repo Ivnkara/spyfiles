@@ -89,31 +89,6 @@ int scan_dir(char * path, int print_result, int new_dir)
 }
 
 /**
- * Добавляет файл к списку отслеживаемых файлов
- *
- * @param  char * pathfile
- * @return int
- */
-int add_file_to_list(char * pathfile, char * filename)
-{
-	struct stat sb;
-
-	stat(pathfile, &sb);
-
-	list[count_scan_list].path = calloc(PATHNAME_SIZE, sizeof(char));
-	list[count_scan_list].name = calloc(FILENAME_SIZE, sizeof(char));
-
-	strcpy(list[count_scan_list].path, pathfile);
-	strcpy(list[count_scan_list].name, filename);
-	list[count_scan_list].size = sb.st_size;
-
-	bzero((char *)&sb, sizeof(sb));
-	count_scan_list++;
-
-	return 0;
-}
-
-/**
  * Проверяет изменился ли размер файла, при событии IN_MODIFY,
  * если да, сравнивает и вычисляет разницу в байтах
  *
@@ -135,6 +110,31 @@ int check_file(char * filename)
 			}
 		 } 
 	}
+
+	return 0;
+}
+
+/**
+ * Добавляет файл к списку отслеживаемых файлов
+ *
+ * @param  char * pathfile
+ * @return int
+ */
+int add_file_to_list(char * pathfile, char * filename)
+{
+	struct stat sb;
+
+	stat(pathfile, &sb);
+
+	list[count_scan_list].path = calloc(PATHNAME_SIZE, sizeof(char));
+	list[count_scan_list].name = calloc(FILENAME_SIZE, sizeof(char));
+
+	strcpy(list[count_scan_list].path, pathfile);
+	strcpy(list[count_scan_list].name, filename);
+	list[count_scan_list].size = sb.st_size;
+
+	bzero((char *)&sb, sizeof(sb));
+	count_scan_list++;
 
 	return 0;
 }

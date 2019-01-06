@@ -18,9 +18,6 @@ char * tempfile_for_event;
 char * tempdir_for_filesize;
 char * tempfile_for_filesize;
 
-char * tempdir_for_print;
-char * tempfile_for_print;
-
 int inotify_fd;
 
 void * wr_file(void * which_file)
@@ -28,11 +25,13 @@ void * wr_file(void * which_file)
 	int fd;
 	int type = *(int *)which_file;
 
-
-	if (type == 1) {
+	switch (type) {
+	case 1:
 		fd = open(tempfile_for_event, O_CREAT | O_WRONLY | O_TRUNC, 0777);
-	} else if (type == 2) {
+		break;
+	case 2:
 		fd = open(tempfile_for_filesize, O_CREAT | O_WRONLY | O_APPEND, 0777);
+		break;
 	}
 
 	if (fd < 0) {
@@ -119,18 +118,18 @@ static char * test_check_file()
 		read(p[0], ptr, 1);
 		ptr++;
 	} while(ptr[-1] != '\n');
+
 	ptr[-1] = '\0';
-
 	fflush(stdout);
-
-	mu_assert("---> ERROR, start_spy return not zero", 0 == result);
-	mu_assert("---> ERROR, stdout not equals expected", strcmp(expected, buf) == 0);
 	*ptr = 0;
 
 	dup2(old_stdout, 1);
 	close(old_stdout);
 	close(p[0]);
 	close(p[1]);
+
+	mu_assert("---> ERROR, start_spy return not zero", 0 == result);
+	mu_assert("---> ERROR, stdout not equals expected", strcmp(expected, buf) == 0);
 
 	return 0;
 }
@@ -163,17 +162,81 @@ static char * test_print_changes_file()
 		read(p[0], ptr, 1);
 		ptr++;
 	} while(ptr[-1] != '\n');
+
 	ptr[-1] = '\0';
-
 	fflush(stdout);
-
-	mu_assert("---> ERROR, stdout not equals expected", strcmp(expected, buf) == 0);
 	*ptr = 0;
 
 	dup2(old_stdout, 1);
 	close(old_stdout);
 	close(p[0]);
 	close(p[1]);
+
+	mu_assert("---> ERROR, stdout not equals expected", strcmp(expected, buf) == 0);
+
+	return 0;
+}
+
+static char * test_add_file_to_scan()
+{
+	char expected[] = "-:-:-:-:-:-: Был создан и добавлен к списку файл под именем tmp_second.txt :-:-:-:-:-:-";
+	int old_stdout = dup(1);
+	int p[2];
+	pipe(p);
+	dup2(p[1], 1);
+	char buf[300];
+	char *ptr = buf;
+
+	int result = add_file_to_scan("tmp_second.txt");
+
+	do {
+		read(p[0], ptr, 1);
+		ptr++;
+	} while(ptr[-1] != '\n');
+
+	ptr[-1] = '\0';
+	fflush(stdout);
+
+	*ptr = 0;
+	dup2(old_stdout, 1);
+	close(old_stdout);
+	close(p[0]);
+	close(p[1]);
+
+	mu_assert("---> ERROR, stdout not equals expected", strcmp(expected, buf) == 0);
+	mu_assert("---> ERROR, add_file_to_scan return not zero", 0 == result);
+
+	return 0;
+}
+
+static char * test_remove_file_to_scan()
+{
+	char expected[] = "-:-:-:-:-:-: Был удалён файл из списка отслеживани и директории tmp_second.txt :-:-:-:-:-:-";
+	int old_stdout = dup(1);
+	int p[2];
+	pipe(p);
+	dup2(p[1], 1);
+	char buf[300];
+	char *ptr = buf;
+
+	int result = remove_file_to_scan("tmp_second.txt");
+
+	do {
+		read(p[0], ptr, 1);
+		ptr++;
+	} while(ptr[-1] != '\n');
+
+	ptr[-1] = '\0';
+	fflush(stdout);
+
+	*ptr = 0;
+	dup2(old_stdout, 1);
+	close(old_stdout);
+	close(p[0]);
+	close(p[1]);
+
+	mu_assert("---> ERROR, stdout not equals expected", strcmp(expected, buf) == 0);
+	mu_assert("---> ERROR, remove_file_to_scan return not zero", 0 == result);
 
 	return 0;
 }
@@ -229,6 +292,8 @@ static char * all_tests()
 	mu_run_test(test_scan_dir);
 	mu_run_test(test_print_changes_file);
 	mu_run_test(test_check_file);
+	mu_run_test(test_add_file_to_scan);
+	mu_run_test(test_remove_file_to_scan);
 
 	return 0;
 }
