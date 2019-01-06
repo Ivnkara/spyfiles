@@ -160,6 +160,34 @@ int add_file_to_scan(char * filename)
 }
 
 /**
+ * Удаляет файл из списка для отслеживания и распечатывает эту информацию
+ *
+ * @param  char * filename Имя удаляемого файла
+ * @return int
+ */
+int remove_file_to_scan(char * filename)
+{
+	printf("-:-:-:-:-:-: Был удалён файл из списка отслеживани и директории %s :-:-:-:-:-:-\n", filename);
+	int which, i;
+
+	for (i = 0; i < count_scan_list; ++i) {
+		if (strcmp(filename, list[i].name) == 0) {
+			which = i;
+		}
+	}
+
+	for (i = which; i < count_scan_list - 1; ++i) {
+		list[i] = list[i + 1];
+	}
+
+	count_scan_list--;
+
+	print_scan_list(list, count_scan_list);
+
+	return 0;
+}
+
+/**
  * Выводит в stdout конец файла равный количеству переданных байт
  *
  * TODO: нужно сделать чтобы выводил именно новые данные, а не конец файла
@@ -192,3 +220,4 @@ void print_changes_file(char * pathfile, int bytes)
 	free(buffer);
 	close(df);
 }
+ 

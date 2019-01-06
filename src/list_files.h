@@ -17,8 +17,9 @@ extern int count_scan_list;
 
 int scan_dir(char * path, int print_result, int new_dir);
 int check_file(char * filename);
-int add_file_to_scan(char * filename);
 int add_file_to_list(char * pathfile, char * filename);
+int add_file_to_scan(char * filename);
+int remove_file_to_scan(char * filename);
 
 void print_changes_file(char * pathfile, int bytes);
 

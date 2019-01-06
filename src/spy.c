@@ -70,12 +70,12 @@ int get_event(int inotify_fd, char * buf)
 	}
 
 	int count = 0;
+	
 	while (i < len) {
 		struct inotify_event * event = (struct inotify_event * ) &buf[i];
 		i += EVENT_SIZE + event->len;
 		count++;
 	}
-
 
 	return count;
 }
@@ -91,6 +91,7 @@ int prepare_event(int count, char * events)
 	int bytes = 0;
 	for (int i = 0; i < count; ++i) {
 		struct inotify_event * event = (struct inotify_event * ) &events[bytes];
+		
 		if (event->len) {
 			switch (event->mask & (IN_MODIFY | IN_CREATE | IN_DELETE)) {
 				case IN_MODIFY:
@@ -105,10 +106,11 @@ int prepare_event(int count, char * events)
 					break;
 				case IN_DELETE:
 					if (event->mask | IN_ISDIR) {
-						// делаем что-нибудь
+						remove_file_to_scan(event->name);
 					}
 			}
 		}
+		
 		bytes += EVENT_SIZE + event->len;
 	}
 
