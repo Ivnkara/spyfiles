@@ -12,28 +12,33 @@
 #include "list_files.h"
 
 /**
- * Директория для отслеживания файлов
+ * Список директорий для отслеживания файлов
  */
-char * scan_path = NULL;
+char * scan_list[MAX_SCAN_LIST];
+
 /**
  * Массив структур с информацией отслеживаемых файлов 
  */
 struct scan_list list[PATH_MAX];
+
 /**
  * Переменная с количеством элементов в массие list
  */
 int count_scan_list;
 
 /**
- * Инициализирует переменную scan_path
+ * Инициализирует переменную scan_list
  *
- * @param  char  * path Путь до директории
- * @return int
+ * @param Список аргументов cli
+ * @param Количество аргументов
  */
-int init_scan_path(char * path)
+int init_scan_list(char const * argv[], int argc)
 {
-	scan_path = calloc(PATHNAME_SIZE, sizeof(char));
-	strcpy(scan_path, path);
+	for (int i = 1; i <= argc; ++i) {
+		scan_list[i - 1] = calloc(PATHNAME_SIZE, sizeof(char));
+
+		strcpy(scan_list[i - 1], argv[i]);
+	}
 
 	return 0;
 }
@@ -43,29 +48,27 @@ int init_scan_path(char * path)
  * в специальный массив list структур scan_list,
  * после чего распичатывает список файлов и директорий
  *
- * @param  char * path         Путь до сканируемой директории
- * @param  int    print_result Печатать ли результат сканирования
- * @param  int    new_dir      Переиницилизировать ли scan_path
- * @return int                 0 - успех, -1 - ошибка
+ * @param  Список аргументов cli
+ * @param  Количество аргументов
+ * @param  Печатать ли результат сканирования
+ * @return 0 - успех, -1 - ошибка
  */
-int scan_dir(char * path, int print_result, int new_dir)
+int scan_dir(char const * argv[], int argc, int print_result)
 {
-	DIR *dir;
+	DIR * dir;
 	struct dirent *ent;
 	char * pathfile = calloc(PATHNAME_SIZE, sizeof(char));
 	count_scan_list = 0;
 
-	if (scan_path == NULL || new_dir == 1) {
-		init_scan_path(path);
-	}
+	init_scan_list(argv, argc);
 
-	if ((dir = opendir(scan_path)) != NULL) {
+	if ((dir = opendir(scan_list[0])) != NULL) {
 		while ((ent = readdir(dir)) != NULL) {
 			if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
 				continue;
 			}
 
-			pathfile = strcpy(pathfile, scan_path);
+			pathfile = strcpy(pathfile, scan_list[0]);
 
 			strcat(pathfile, ent->d_name);
 			add_file_to_list(pathfile, ent->d_name);
@@ -151,7 +154,7 @@ int add_file_to_scan(char * filename)
 
 	char * pathfile = calloc(PATHNAME_SIZE, sizeof(char));
 
-	strcpy(pathfile, scan_path);
+	strcpy(pathfile, scan_list[0]);
 	strcat(pathfile, filename);
 
 	add_file_to_list(pathfile, filename);

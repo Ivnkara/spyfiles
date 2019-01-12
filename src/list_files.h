@@ -4,6 +4,7 @@
 #include <linux/limits.h>
 
 #define PATHNAME_SIZE 256
+#define MAX_SCAN_LIST 9
 #define FILENAME_SIZE 64
 
 struct scan_list {
@@ -15,7 +16,8 @@ struct scan_list {
 extern struct scan_list list[PATH_MAX];
 extern int count_scan_list;
 
-int scan_dir(char * path, int print_result, int new_dir);
+int init_scan_list(char const * argv[], int argc);
+int scan_dir(char const *argv[], int argc, int print_result);
 int check_file(char * filename);
 int add_file_to_list(char * pathfile, char * filename);
 int add_file_to_scan(char * filename);
