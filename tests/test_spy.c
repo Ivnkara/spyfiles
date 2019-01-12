@@ -180,6 +180,8 @@ static char * test_print_changes_file()
 static char * test_add_file_to_scan()
 {
 	char expected[] = "-:-:-:-:-:-: Был создан и добавлен к списку файл под именем tmp_second.txt :-:-:-:-:-:-";
+
+	mu_assert("---> ERROR, count_scan_list wrong value", 1 == count_scan_list);
 	int old_stdout = dup(1);
 	int p[2];
 	pipe(p);
@@ -205,6 +207,7 @@ static char * test_add_file_to_scan()
 
 	mu_assert("---> ERROR, stdout not equals expected", strcmp(expected, buf) == 0);
 	mu_assert("---> ERROR, add_file_to_scan return not zero", 0 == result);
+	mu_assert("---> ERROR, count_scan_list wrong value", 2 == count_scan_list);
 
 	return 0;
 }
@@ -212,6 +215,8 @@ static char * test_add_file_to_scan()
 static char * test_remove_file_to_scan()
 {
 	char expected[] = "-:-:-:-:-:-: Был удалён файл из списка отслеживани и директории tmp_second.txt :-:-:-:-:-:-";
+
+	mu_assert("---> ERROR, count_scan_list wrong value", 2 == count_scan_list);
 	int old_stdout = dup(1);
 	int p[2];
 	pipe(p);
@@ -237,6 +242,7 @@ static char * test_remove_file_to_scan()
 
 	mu_assert("---> ERROR, stdout not equals expected", strcmp(expected, buf) == 0);
 	mu_assert("---> ERROR, remove_file_to_scan return not zero", 0 == result);
+	mu_assert("---> ERROR, count_scan_list wrong value", 1 == count_scan_list);
 
 	return 0;
 }
