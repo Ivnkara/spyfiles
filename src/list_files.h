@@ -15,6 +15,8 @@ struct scan_list {
 // extern char * scan_path;
 extern struct scan_list list_files[PATH_MAX];
 extern int count_list_files;
+extern char * list_dirs[MAX_SCAN_LIST];
+extern int count_list_dirs;
 
 int init_scan_list(char const * argv[], int argc);
 int scan_dir(char const * argv[], int argc, int print_result, int init_list);

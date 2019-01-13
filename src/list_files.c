@@ -14,7 +14,12 @@
 /**
  * Список директорий для отслеживания файлов
  */
-char * scan_list[MAX_SCAN_LIST];
+char * list_dirs[MAX_SCAN_LIST];
+
+/**
+ * Количество директорий для отслеживания
+ */
+int count_list_dirs;
 
 /**
  * Массив структур с информацией отслеживаемых файлов 
@@ -36,10 +41,12 @@ int init_scan_list(char const * argv[], int argc)
 {
 	int i, j;
 	for (i = 1, j = 0; i < argc; ++i, ++j) {
-		scan_list[j] = calloc(PATHNAME_SIZE, sizeof(char));
+		list_dirs[j] = calloc(PATHNAME_SIZE, sizeof(char));
 
-		strcpy(scan_list[j], argv[i]);
+		strcpy(list_dirs[j], argv[i]);
 	}
+
+	count_list_dirs = j;
 
 	return 0;
 }
@@ -66,24 +73,26 @@ int scan_dir(char const * argv[], int argc, int print_result, int init_list)
 		init_scan_list(argv, argc);
 	}
 
-	if ((dir = opendir(scan_list[0])) != NULL) {
-		while ((ent = readdir(dir)) != NULL) {
-			if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
-				continue;
-			}
+	for (int i = 0; i < count_list_dirs; ++i) {
+		if ((dir = opendir(list_dirs[i])) != NULL) {
+			while ((ent = readdir(dir)) != NULL) {
+				if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
+					continue;
+				}
 
-			pathfile = strcpy(pathfile, scan_list[0]);
+				pathfile = strcpy(pathfile, list_dirs[i]);
 
-			strcat(pathfile, ent->d_name);
-			add_file_to_list(pathfile, ent->d_name);
-			bzero(pathfile, PATHNAME_SIZE);
-  		}
+				strcat(pathfile, ent->d_name);
+				add_file_to_list(pathfile, ent->d_name);
+				bzero(pathfile, PATHNAME_SIZE);
+	  		}
 
-		closedir(dir);
-	} else {
-		perror("Opendir fail: ");
+			closedir(dir);
+		} else {
+			perror("Opendir fail: ");
 
-		return -1;
+			return -1;
+		}
 	}
 
 	free(pathfile);
@@ -158,7 +167,7 @@ int add_file_to_scan(char * filename)
 
 	char * pathfile = calloc(PATHNAME_SIZE, sizeof(char));
 
-	strcpy(pathfile, scan_list[0]);
+	strcpy(pathfile, list_dirs[0]);
 	strcat(pathfile, filename);
 
 	add_file_to_list(pathfile, filename);

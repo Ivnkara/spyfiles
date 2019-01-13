@@ -39,15 +39,19 @@ int get_inotify_fd()
  */
 int get_watch_wd(char * path, int inotify_fd)
 {
-	int wd = inotify_add_watch(inotify_fd, path, IN_MODIFY | IN_CREATE | IN_DELETE);
+	int wd, i;
 
-	if (wd < 0) {
-		perror("Error inotify add watch: ");
+	for (i = 0; i < count_list_dirs; ++i) {
+		wd = inotify_add_watch(inotify_fd, list_dirs[i], IN_MODIFY | IN_CREATE | IN_DELETE);
 
-		return -1;
+		if (wd < 0) {
+			perror("Error inotify add watch: ");
+
+			return -1;
+		}
 	}
 
-	return wd;
+	return 0;
 }
 
 /**
