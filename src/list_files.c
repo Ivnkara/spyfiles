@@ -19,12 +19,12 @@ char * scan_list[MAX_SCAN_LIST];
 /**
  * Массив структур с информацией отслеживаемых файлов 
  */
-struct scan_list list[PATH_MAX];
+struct scan_list list_files[PATH_MAX];
 
 /**
- * Переменная с количеством элементов в массие list
+ * Переменная с количеством элементов в массие list_files
  */
-int count_scan_list;
+int count_list_files;
 
 /**
  * Инициализирует переменную scan_list
@@ -34,10 +34,11 @@ int count_scan_list;
  */
 int init_scan_list(char const * argv[], int argc)
 {
-	for (int i = 1; i <= argc; ++i) {
-		scan_list[i - 1] = calloc(PATHNAME_SIZE, sizeof(char));
+	int i, j;
+	for (i = 1, j = 0; i < argc; ++i, ++j) {
+		scan_list[j] = calloc(PATHNAME_SIZE, sizeof(char));
 
-		strcpy(scan_list[i - 1], argv[i]);
+		strcpy(scan_list[j], argv[i]);
 	}
 
 	return 0;
@@ -45,22 +46,25 @@ int init_scan_list(char const * argv[], int argc)
 
 /**
  * Сканирует директорию и записывает список файлов (путь, имя, размер)
- * в специальный массив list структур scan_list,
+ * в специальный массив list_files структур scan_list,
  * после чего распичатывает список файлов и директорий
  *
  * @param  Список аргументов cli
  * @param  Количество аргументов
  * @param  Печатать ли результат сканирования
+ * @param  Инициализировать ли список сканироваемых директорий
  * @return 0 - успех, -1 - ошибка
  */
-int scan_dir(char const * argv[], int argc, int print_result)
+int scan_dir(char const * argv[], int argc, int print_result, int init_list)
 {
 	DIR * dir;
-	struct dirent *ent;
+	struct dirent * ent;
 	char * pathfile = calloc(PATHNAME_SIZE, sizeof(char));
-	count_scan_list = 0;
+	count_list_files = 0;
 
-	init_scan_list(argv, argc);
+	if (init_list) {
+		init_scan_list(argv, argc);
+	}
 
 	if ((dir = opendir(scan_list[0])) != NULL) {
 		while ((ent = readdir(dir)) != NULL) {
@@ -85,7 +89,7 @@ int scan_dir(char const * argv[], int argc, int print_result)
 	free(pathfile);
 
 	if (print_result) {
-		print_scan_list(list, count_scan_list);
+		print_scan_list(list_files, count_list_files);
 	}
 
 	return 0;
@@ -102,14 +106,14 @@ int check_file(char * filename)
 {
 	struct stat sb;
 
-	for (int i = 0; i < count_scan_list; ++i) {
-		if (strcmp(list[i].name, filename) == 0) {
-			stat(list[i].path, &sb);
+	for (int i = 0; i < count_list_files; ++i) {
+		if (strcmp(list_files[i].name, filename) == 0) {
+			stat(list_files[i].path, &sb);
 
-			if (list[i].size < sb.st_size) {
-				uint sub = sb.st_size - list[i].size; 
+			if (list_files[i].size < sb.st_size) {
+				uint sub = sb.st_size - list_files[i].size; 
 				printf("-----> Размер файла %s увеличился на %d байт\n", filename, sub);
-				print_changes_file(list[i].path, sub);
+				print_changes_file(list_files[i].path, sub);
 			}
 		 } 
 	}
@@ -129,15 +133,15 @@ int add_file_to_list(char * pathfile, char * filename)
 
 	stat(pathfile, &sb);
 
-	list[count_scan_list].path = calloc(PATHNAME_SIZE, sizeof(char));
-	list[count_scan_list].name = calloc(FILENAME_SIZE, sizeof(char));
+	list_files[count_list_files].path = calloc(PATHNAME_SIZE, sizeof(char));
+	list_files[count_list_files].name = calloc(FILENAME_SIZE, sizeof(char));
 
-	strcpy(list[count_scan_list].path, pathfile);
-	strcpy(list[count_scan_list].name, filename);
-	list[count_scan_list].size = sb.st_size;
+	strcpy(list_files[count_list_files].path, pathfile);
+	strcpy(list_files[count_list_files].name, filename);
+	list_files[count_list_files].size = sb.st_size;
 
 	bzero((char *)&sb, sizeof(sb));
-	count_scan_list++;
+	count_list_files++;
 
 	return 0;
 }
@@ -173,19 +177,19 @@ int remove_file_to_scan(char * filename)
 	printf("-:-:-:-:-:-: Был удалён файл из списка отслеживани и директории %s :-:-:-:-:-:-\n", filename);
 	int which, i;
 
-	for (i = 0; i < count_scan_list; ++i) {
-		if (strcmp(filename, list[i].name) == 0) {
+	for (i = 0; i < count_list_files; ++i) {
+		if (strcmp(filename, list_files[i].name) == 0) {
 			which = i;
 		}
 	}
 
-	for (i = which; i < count_scan_list - 1; ++i) {
-		list[i] = list[i + 1];
+	for (i = which; i < count_list_files - 1; ++i) {
+		list_files[i] = list_files[i + 1];
 	}
 
-	count_scan_list--;
+	count_list_files--;
 
-	print_scan_list(list, count_scan_list);
+	print_scan_list(list_files, count_list_files);
 
 	return 0;
 }

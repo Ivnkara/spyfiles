@@ -3,3 +3,4 @@ spy-files
 src/*.o
 test/*.o
 tmp/*
+tmp2/*

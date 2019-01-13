@@ -13,11 +13,11 @@ struct scan_list {
 };
 
 // extern char * scan_path;
-extern struct scan_list list[PATH_MAX];
-extern int count_scan_list;
+extern struct scan_list list_files[PATH_MAX];
+extern int count_list_files;
 
 int init_scan_list(char const * argv[], int argc);
-int scan_dir(char const *argv[], int argc, int print_result);
+int scan_dir(char const * argv[], int argc, int print_result, int init_list);
 int check_file(char * filename);
 int add_file_to_list(char * pathfile, char * filename);
 int add_file_to_scan(char * filename);
