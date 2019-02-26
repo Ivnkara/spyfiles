@@ -18,8 +18,6 @@ char * tempfile_for_event;
 char * tempdir_for_filesize;
 char * tempfile_for_filesize;
 
-int inotify_fd;
-
 void * wr_file(void * which_file)
 {
 	int fd;
@@ -49,16 +47,18 @@ void * wr_file(void * which_file)
 
 static char * test_get_inotify_fd()
 {
-	inotify_fd = get_inotify_fd();
+	int inotify_fd = get_inotify_fd();
 
 	mu_assert("---> ERROR, get_inotify_fd returns error", inotify_fd > 0);
 
 	return 0;
 }
 
-static char * test_get_watch_wd()
+static char * test_add_watch()
 {
-	mu_assert("---> ERROR, get_watch_wd returns error", get_watch_wd(tempdir_for_event, inotify_fd) > 0);
+	int inotify_fd = get_inotify_fd();
+
+	mu_assert("---> ERROR, add_watch returns error", add_watch(inotify_fd) == 0);
 
 	return 0;
 }
@@ -66,26 +66,33 @@ static char * test_get_watch_wd()
 static char * test_get_event()
 {
 	char expected[] = "tmp.txt";
-
 	int arg = 1;
-	pthread_t wr_file_thread;
-	pthread_create(&wr_file_thread, NULL, wr_file, &arg);
-
+	char * dirs[] = {tempdir_for_event};
+	int inotify_fd = get_inotify_fd();
 	char * events = calloc(BUF_LEN, sizeof(char));
-	get_event(inotify_fd, events);	
+	pthread_t wr_file_thread;
+	void *ret;
+
+	scan_dir(dirs, 1, 0, 1);
+	add_watch(inotify_fd);
+	
+	pthread_create(&wr_file_thread, NULL, wr_file, &arg);
+	get_event(inotify_fd, events);
+
+	pthread_join(wr_file_thread, &ret);
 	struct inotify_event * event = (struct inotify_event * ) &events[0];
 
 	mu_assert("---> ERROR, get_event returns wrong name file", strcmp(expected, event->name) == 0);
 
-	void *ret;
-	pthread_join(wr_file_thread, &ret);
 
 	return 0;
 }
 
 static char * test_scan_dir()
 {
-	mu_assert("---> ERROR, scan_dir returns not zero", scan_dir(tempdir_for_event, 0, 1) == 0);
+	char * dirs[] = {tempdir_for_event};
+
+	mu_assert("---> ERROR, scan_dir returns not zero", scan_dir(dirs, 1, 0, 1) == 0);
 
 	return 0;
 }
@@ -100,6 +107,7 @@ static char * test_check_file()
 	char buf[100];
 	char *ptr = buf;
 	int arg = 2;
+	char * dirs[] = {tempdir_for_filesize};
 	
 	pthread_t wr_file_thread1, wr_file_thread2;
 	void * ret1, * ret2;
@@ -107,7 +115,7 @@ static char * test_check_file()
 	pthread_create(&wr_file_thread1, NULL, wr_file, &arg);
 	pthread_join(wr_file_thread1, &ret1);
 
-	scan_dir(tempdir_for_filesize, 0, 1);
+	scan_dir(dirs, 1, 0, 1);
 
 	pthread_create(&wr_file_thread2, NULL, wr_file, &arg);
 	pthread_join(wr_file_thread2, &ret2);
@@ -144,6 +152,7 @@ static char * test_print_changes_file()
 	char buf[80];
 	char *ptr = buf;
 	int arg = 2;
+	char * dirs[] = {tempdir_for_filesize}; 
 	
 	pthread_t wr_file_thread1, wr_file_thread2;
 	pthread_create(&wr_file_thread1, NULL, wr_file, &arg);
@@ -151,7 +160,7 @@ static char * test_print_changes_file()
 	void * ret1, * ret2;
 	pthread_join(wr_file_thread1, &ret1);
 
-	scan_dir(tempdir_for_filesize, 0, 1);
+	scan_dir(dirs, 1, 0, 1);
 
 	pthread_create(&wr_file_thread2, NULL, wr_file, &arg);
 	pthread_join(wr_file_thread2, &ret2);
@@ -181,7 +190,7 @@ static char * test_add_file_to_scan()
 {
 	char expected[] = "-:-:-:-:-:-: Был создан и добавлен к списку файл под именем tmp_second.txt :-:-:-:-:-:-";
 
-	mu_assert("---> ERROR, count_scan_list wrong value", 1 == count_scan_list);
+	mu_assert("---> ERROR, count_list_files wrong value", 1 == count_list_files);
 	int old_stdout = dup(1);
 	int p[2];
 	pipe(p);
@@ -207,7 +216,7 @@ static char * test_add_file_to_scan()
 
 	mu_assert("---> ERROR, stdout not equals expected", strcmp(expected, buf) == 0);
 	mu_assert("---> ERROR, add_file_to_scan return not zero", 0 == result);
-	mu_assert("---> ERROR, count_scan_list wrong value", 2 == count_scan_list);
+	mu_assert("---> ERROR, count_list_files wrong value", 2 == count_list_files);
 
 	return 0;
 }
@@ -216,7 +225,7 @@ static char * test_remove_file_to_scan()
 {
 	char expected[] = "-:-:-:-:-:-: Был удалён файл из списка отслеживани и директории tmp_second.txt :-:-:-:-:-:-";
 
-	mu_assert("---> ERROR, count_scan_list wrong value", 2 == count_scan_list);
+	mu_assert("---> ERROR, count_list_files wrong value", 2 == count_list_files);
 	int old_stdout = dup(1);
 	int p[2];
 	pipe(p);
@@ -242,7 +251,7 @@ static char * test_remove_file_to_scan()
 
 	mu_assert("---> ERROR, stdout not equals expected", strcmp(expected, buf) == 0);
 	mu_assert("---> ERROR, remove_file_to_scan return not zero", 0 == result);
-	mu_assert("---> ERROR, count_scan_list wrong value", 1 == count_scan_list);
+	mu_assert("---> ERROR, count_list_files wrong value", 1 == count_list_files);
 
 	return 0;
 }
@@ -293,7 +302,7 @@ int tests_run = 0;
 static char * all_tests()
 {
 	mu_run_test(test_get_inotify_fd);
-	mu_run_test(test_get_watch_wd);
+	mu_run_test(test_add_watch);
 	mu_run_test(test_get_event);
 	mu_run_test(test_scan_dir);
 	mu_run_test(test_print_changes_file);

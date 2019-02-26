@@ -18,8 +18,8 @@ extern int count_list_files;
 extern char * list_dirs[MAX_SCAN_LIST];
 extern int count_list_dirs;
 
-int init_scan_list(char const * argv[], int argc);
-int scan_dir(char const * argv[], int argc, int print_result, int init_list);
+int init_scan_list(char ** array_dirs, int argc);
+int scan_dir(char ** array_dirs, int argc, int print_result, int init_list);
 int check_file(char * filename);
 int add_file_to_list(char * pathfile, char * filename);
 int add_file_to_scan(char * filename);

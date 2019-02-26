@@ -33,11 +33,10 @@ int get_inotify_fd()
 /**
  * Функция начинает следить за директорией
  *
- * @param  char * path       Путь до директории за которой нужно следить
- * @param  int    inotify_fd Путь до директории за которой нужно следить
- * @return int               0 - при успешном завершении, -1 - при ошибке
+ * @param  Идентификатор inotify
+ * @return 0 - при успешном завершении, -1 - при ошибке
  */
-int get_watch_wd(char * path, int inotify_fd)
+int add_watch(int inotify_fd)
 {
 	int wd, i;
 

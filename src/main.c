@@ -9,7 +9,7 @@
 int main(int argc, char const *argv[])
 {
 	if (argc < 2) {
-		fprintf(stderr, "Use spy-files /path/to/spy/dir1 [/path/to/spy/dir2 ...]\n");
+		fprintf(stderr, "Use spy-files /path/to/spy/dir1 [/path/to/spy/dir2 qn");
 
 		return 1;
 	}
@@ -22,13 +22,19 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	if (scan_dir(argv, argc, 1, 1) < 0) {
+	char ** array_dirs = calloc(1024, sizeof(char));
+
+	for (int i = 1; i < argc; ++i) {
+		array_dirs[i] = strdup(argv[i]);
+	}
+
+	if (scan_dir(array_dirs, argc, 1, 1) < 0) {
 		fprintf(stderr, "Error scan dir\n");
 
 		return 1;
 	}
 
-	if (get_watch_wd((char *)argv[1], inotify_fd) < 0) {
+	if (add_watch(inotify_fd) < 0) {
 		fprintf(stderr, "Error get watch wd\n");
 
 		return 1;
@@ -38,7 +44,7 @@ int main(int argc, char const *argv[])
 	int count;
 
 	while (1) {
-		scan_dir(argv, argc, 0, 0);
+		scan_dir(array_dirs, argc, 0, 0);
 	
 		count = get_event(inotify_fd, events);
 	

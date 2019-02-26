@@ -37,13 +37,20 @@ int count_list_files;
  * @param Список аргументов cli
  * @param Количество аргументов
  */
-int init_scan_list(char const * argv[], int argc)
+int init_scan_list(char ** array_dirs, int argc)
 {
 	int i, j;
-	for (i = 1, j = 0; i < argc; ++i, ++j) {
-		list_dirs[j] = calloc(PATHNAME_SIZE, sizeof(char));
+	DIR * dir;
 
-		strcpy(list_dirs[j], argv[i]);
+	for (i = 0, j = 0; i < argc; ++i) {
+		if((dir = opendir(array_dirs[i])) != NULL)  {
+			list_dirs[j] = calloc(PATHNAME_SIZE, sizeof(char));
+
+			strcpy(list_dirs[j], array_dirs[i]);
+			closedir(dir);
+
+			++j;
+		}
 	}
 
 	count_list_dirs = j;
@@ -62,20 +69,22 @@ int init_scan_list(char const * argv[], int argc)
  * @param  Инициализировать ли список сканироваемых директорий
  * @return 0 - успех, -1 - ошибка
  */
-int scan_dir(char const * argv[], int argc, int print_result, int init_list)
+int scan_dir(char ** array_dirs, int argc, int print_result, int init_list)
 {
 	DIR * dir;
 	struct dirent * ent;
 	char * pathfile = calloc(PATHNAME_SIZE, sizeof(char));
 	count_list_files = 0;
+	int g = 0;
 
 	if (init_list) {
-		init_scan_list(argv, argc);
+		init_scan_list(array_dirs, argc);
 	}
 
 	for (int i = 0; i < count_list_dirs; ++i) {
 		if ((dir = opendir(list_dirs[i])) != NULL) {
 			while ((ent = readdir(dir)) != NULL) {
+				g++;
 				if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
 					continue;
 				}
@@ -197,8 +206,6 @@ int remove_file_to_scan(char * filename)
 	}
 
 	count_list_files--;
-
-	print_scan_list(list_files, count_list_files);
 
 	return 0;
 }

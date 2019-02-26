@@ -8,7 +8,7 @@
 #define BUF_LEN (1024 * (EVENT_SIZE + 16))
 
 int get_inotify_fd();
-int get_watch_wd(char * path, int inotify_fd);
+int add_watch(int inotify_fd);
 int prepare_event(int count, char * events);
 
 int get_event(int inotify_fd, char * buf);
