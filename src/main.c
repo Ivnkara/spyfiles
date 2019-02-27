@@ -24,11 +24,14 @@ int main(int argc, char const *argv[])
 
 	char ** array_dirs = calloc(1024, sizeof(char));
 
-	for (int i = 1; i < argc; ++i) {
-		array_dirs[i] = strdup(argv[i]);
+	int i, j;
+	for (i = 1, j = 0; i < argc; ++i, ++j) {
+		array_dirs[j] = strdup(argv[i]);
 	}
 
-	if (scan_dir(array_dirs, argc, 1, 1) < 0) {
+	int all_dirs = j;
+
+	if (scan_dir(array_dirs, all_dirs, 1, 1) < 0) {
 		fprintf(stderr, "Error scan dir\n");
 
 		return 1;
@@ -44,7 +47,7 @@ int main(int argc, char const *argv[])
 	int count;
 
 	while (1) {
-		scan_dir(array_dirs, argc, 0, 0);
+		scan_dir(array_dirs, all_dirs, 0, 0);
 	
 		count = get_event(inotify_fd, events);
 	

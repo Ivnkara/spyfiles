@@ -48,7 +48,6 @@ int init_scan_list(char ** array_dirs, int argc)
 
 			strcpy(list_dirs[j], array_dirs[i]);
 			closedir(dir);
-
 			++j;
 		}
 	}
