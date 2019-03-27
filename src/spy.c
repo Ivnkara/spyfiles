@@ -14,8 +14,6 @@
 
 /**
  * Получить дескриптор inotify
- *
- * @return int inotify_fd
  */
 int get_inotify_fd()
 {
@@ -32,9 +30,6 @@ int get_inotify_fd()
 
 /**
  * Функция начинает следить за директорией
- *
- * @param  Идентификатор inotify
- * @return 0 - при успешном завершении, -1 - при ошибке
  */
 int add_watch(int inotify_fd)
 {
@@ -55,9 +50,6 @@ int add_watch(int inotify_fd)
 
 /**
  * Инициирует структуру inotify_event, и отслеживает события в директории
- *
- * @param  int inotify_fd Дескриптор inotify_init
- * @return int    		  0 - успех, -1 - ошибка
  */
 int get_event(int inotify_fd, char * buf)
 {
@@ -83,9 +75,6 @@ int get_event(int inotify_fd, char * buf)
 
 /**
  * Обработка события
- *
- * @param  struct inotify_event * event событие
- * @return int                          0 - успех, -1 - ошибка
  */
 int prepare_event(int count, char * events)
 {

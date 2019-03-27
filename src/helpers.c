@@ -6,8 +6,6 @@
 
 /**
  * Распечатывает переданное событие inotify
- *
- * @param struct inotify_event * event
  */
 void print_event(struct inotify_event * event) {
 	printf("Name:   %s\n", event->name);
@@ -18,10 +16,8 @@ void print_event(struct inotify_event * event) {
 }
 
 /**
- * Распечатывает массив структур list хранящий список файлов в отслеживаемой директории
- *
- * @param struct scan_list * list  Адрес массива структур
- * @param int                count Количество структур в массиве
+ * Распечатывает массив структур list хранящий список
+ * файлов в отслеживаемой директории
  */
 void print_scan_list(struct scan_list * list, int count) {
 	printf("Path: \t\t\tName: \tSize:\n");

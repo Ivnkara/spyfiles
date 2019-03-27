@@ -1,6 +1,7 @@
-test_spy
+.vscode
 spy-files
 src/*.o
+test_spy
 test/*.o
 tmp/*
 tmp2/*

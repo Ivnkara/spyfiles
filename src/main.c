@@ -9,7 +9,7 @@
 int main(int argc, char const *argv[])
 {
 	if (argc < 2) {
-		fprintf(stderr, "Use spy-files /path/to/spy/dir1 [/path/to/spy/dir2 qn");
+		fprintf(stderr, "Use spy-files /path/to/spy/dir1 [/path/to/spy/dir2 ...]\n");
 
 		return 1;
 	}
