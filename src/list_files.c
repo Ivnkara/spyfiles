@@ -33,9 +33,6 @@ int count_list_files;
 
 /**
  * Инициализирует переменную scan_list
- *
- * @param Список аргументов cli
- * @param Количество аргументов
  */
 int init_scan_list(char ** array_dirs, int argc)
 {
@@ -109,9 +106,6 @@ int scan_dir(char ** array_dirs, int argc, int print_result, int init_list)
 /**
  * Проверяет изменился ли размер файла, при событии IN_MODIFY,
  * если да, сравнивает и вычисляет разницу в байтах
- *
- * @param  char * filename Путь до проверяемого файла
- * @return int 
  */
 int check_file(char * filename)
 {
@@ -134,9 +128,6 @@ int check_file(char * filename)
 
 /**
  * Добавляет файл к списку отслеживаемых файлов
- *
- * @param  char * pathfile
- * @return int
  */
 int add_file_to_list(char * pathfile, char * filename)
 {
@@ -159,9 +150,6 @@ int add_file_to_list(char * pathfile, char * filename)
 
 /**
  * Добавляет файл к списку для отслеживания и распечатывает эту информацию
- *
- * @param  char * filename Имя нового файла
- * @return int
  */
 int add_file_to_scan(char * filename)
 {
@@ -179,9 +167,6 @@ int add_file_to_scan(char * filename)
 
 /**
  * Удаляет файл из списка для отслеживания и распечатывает эту информацию
- *
- * @param  char * filename Имя удаляемого файла
- * @return int
  */
 int remove_file_to_scan(char * filename)
 {
@@ -205,11 +190,6 @@ int remove_file_to_scan(char * filename)
 
 /**
  * Выводит в stdout конец файла равный количеству переданных байт
- *
- * TODO: нужно сделать чтобы выводил именно новые данные, а не конец файла
- *
- * @param char * pathfile Путь до файла
- * @param int    bytes    Количество новых байт в файле
  */
 void print_changes_file(char * pathfile, int bytes)
 {

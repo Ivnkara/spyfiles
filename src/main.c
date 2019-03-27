@@ -14,7 +14,10 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
+	int i, j, all_dirs, count;
 	int inotify_fd = get_inotify_fd();
+	char ** array_dirs = calloc(1024, sizeof(char));
+	char * events = calloc(BUF_LEN, sizeof(char));
 
 	if (inotify_fd < 0) {
 		fprintf(stderr, "Error get inotify fd\n");
@@ -22,14 +25,11 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	char ** array_dirs = calloc(1024, sizeof(char));
-
-	int i, j;
 	for (i = 1, j = 0; i < argc; ++i, ++j) {
 		array_dirs[j] = strdup(argv[i]);
 	}
 
-	int all_dirs = j;
+	all_dirs = j;
 
 	if (scan_dir(array_dirs, all_dirs, 1, 1) < 0) {
 		fprintf(stderr, "Error scan dir\n");
@@ -42,9 +42,6 @@ int main(int argc, char const *argv[])
 
 		return 1;
 	}
-
-	char * events = calloc(BUF_LEN, sizeof(char));
-	int count;
 
 	while (1) {
 		scan_dir(array_dirs, all_dirs, 0, 0);
